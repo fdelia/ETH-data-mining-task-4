@@ -1,6 +1,9 @@
-from sklearn.linear_model import LogisticRegression, SGDClassifier
-from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import LogisticRegression, SGDClassifier, SGDRegressor
+from sklearn.neural_network import MLPClassifier, MLPRegressor
 import numpy as np
+from scipy.spatial.distance import euclidean
+# from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 # Hard baseline: 0.0675659248583
 # Easy baseline: 0.0650036196911
@@ -13,8 +16,8 @@ import numpy as np
 
 # Containers
 articles_all = None
-models = None
-model_fits = None
+models = None  # One model per artile feature
+hits = 0
 
 # Temporary variables
 last_user_features = None
@@ -25,48 +28,51 @@ recommended = None
 # Articles: dict(articleID -> features)
 def set_articles(articles):
     global articles_all, models, model_fits
-
     articles_all = articles
-    # One model per article
-    # models = {k:LogisticRegression(warm_start=True, n_jobs=-1) for k, v in articles.iteritems()}
-    # models = {k:SGDClassifier(warm_start=True, n_jobs=-1) for k, v in articles.iteritems()}
-    models = {k:MLPClassifier() for k, v in articles.iteritems()}
-    model_fits = {k:0 for k,v in articles.iteritems()}
+
+    # One model per article feature
+    models = [MLPRegressor() for i in range(6)]
+    # models = [Pipeline([('scaler', StandardScaler()), ('model', SGDRegressor(max_iter=500))]) for i in range(6)]
 
 
 # Train/Update
 # Reward is 0 or -1 (click or no click)
 def update(reward):
-    global last_user_features, recommended
+    global articles_all, last_user_features, recommended, hits
     if reward == 0:
-        for articleId, model in models.iteritems():
-            model_fits[articleId] += 1
-            if articleId == recommended:
-                model.partial_fit([last_user_features], [1], [0, 1])
-            else:
-                model.partial_fit([last_user_features], [0], [0, 1])
-    else:
-        models[recommended].partial_fit([last_user_features], [0], [0, 1])
-        model_fits[recommended] += 1
+        features = articles_all[recommended]
+        for i in range(6):
+            models[i].partial_fit([last_user_features], [features[i]])
+        hits += 1
+    pass
 
 
 # Predict
 # For every line in webscope-logs.txt
 # Choices: list of 20, return one of them
 def recommend(time, user_features, choices):
-    global last_user_features, recommended, model_fits
+    global recommended, last_user_features, hits, articles_all
     last_user_features = user_features
-    recommended = None
+    # scaler = StandardScaler()
 
-    # First try to recommend
-    for choice in choices:
-        if model_fits[choice] > 3:
-            pred = models[choice].predict([user_features])
-            if pred[0] > 0:
+    if hits > 0:
+        # Predict article features for user features
+        features = []
+        for i in range(6):
+            # uf = scaler.fit_transform([user_features])
+            pred = models[i].predict([user_features])
+            features.append(pred[0])
+
+        # Get nearest choice and recommend it
+        dist = 1e99
+        for choice in choices:
+            d = euclidean(features, articles_all[choice])
+            if d < dist:
+                dist = d
                 recommended = choice
-                break
 
     if recommended is None:
         recommended = np.random.choice(choices)
+
     # Always needs to return an article
     return recommended

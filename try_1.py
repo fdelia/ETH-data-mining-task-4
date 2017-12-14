@@ -29,8 +29,8 @@ def set_articles(articles):
     articles_all = articles
     # One model per article
     # models = {k:LogisticRegression(warm_start=True, n_jobs=-1) for k, v in articles.iteritems()}
-    # models = {k:SGDClassifier(warm_start=True, n_jobs=-1) for k, v in articles.iteritems()}
-    models = {k:MLPClassifier() for k, v in articles.iteritems()}
+    models = {k:SGDClassifier(max_iter=300, warm_start=False, n_jobs=-1) for k, v in articles.iteritems()}
+    # models = {k:MLPClassifier() for k, v in articles.iteritems()}
     model_fits = {k:0 for k,v in articles.iteritems()}
 
 
@@ -59,10 +59,13 @@ def recommend(time, user_features, choices):
     recommended = None
 
     # First try to recommend
+    # max_val = 0
     for choice in choices:
-        if model_fits[choice] > 3:
+        if model_fits[choice] > 0:
             pred = models[choice].predict([user_features])
             if pred[0] > 0:
+            # if pred[0][1] > pred[0][0] and pred[0][1] > max_val:
+            #     max_val = pred[0][1]
                 recommended = choice
                 break
 
