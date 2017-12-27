@@ -1,4 +1,22 @@
-0.1  
-INFO:__main__:CTR achieved by the policy: 0.04103
-0.2
-INFO:__main__:CTR achieved by the policy: 0.03103
+2  
+INFO:__main__:CTR achieved by the policy: 0.04286
+2.3  
+INFO:__main__:CTR achieved by the policy: 0.04286
+2.6  
+INFO:__main__:CTR achieved by the policy: 0.04256
+2.9  
+INFO:__main__:CTR achieved by the policy: 0.04299
+3.2  
+INFO:__main__:CTR achieved by the policy: 0.04309
+3.5  
+INFO:__main__:CTR achieved by the policy: 0.04309
+3.8  
+INFO:__main__:CTR achieved by the policy: 0.04295
+4.1  
+INFO:__main__:CTR achieved by the policy: 0.04227
+4.4  
+INFO:__main__:CTR achieved by the policy: 0.04254
+4.7  
+INFO:__main__:CTR achieved by the policy: 0.04254
+5  
+INFO:__main__:CTR achieved by the policy: 0.04361

@@ -29,6 +29,7 @@ import numpy as np
 import resource
 import signal
 import sys
+import timeit
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
@@ -42,7 +43,7 @@ def process_line(policy, logline):
     return reward, chosen, policy.recommend(time, user_features, articles)
 
 
-def evaluate(policy, input_generator):
+def evaluate(policy, input_generator, start_time):
     score = 0.0
     impressions = 0.0
     n_lines = 0.0
@@ -60,6 +61,8 @@ def evaluate(policy, input_generator):
         logger.info("No impressions were made.")
         return 0.0
     else:
+        elapsed = timeit.default_timer() - start_time
+        print("time: %f s" % elapsed)
         score /= impressions
         logger.info("CTR achieved by the policy: %.5f" % score)
         return score
@@ -73,6 +76,8 @@ def import_from_file(f):
 
 
 def run(source, log_file, articles_file):
+    start_time = timeit.default_timer()
+
     policy = import_from_file(source)
     articles_np = np.loadtxt(articles_file)
     articles = {}
@@ -80,7 +85,7 @@ def run(source, log_file, articles_file):
         articles[int(art[0])] = [float(x) for x in art[1:]]
     policy.set_articles(articles)
     with io.open(log_file, 'rb', buffering=1024*1024*512) as inf:
-        return evaluate(policy, inf)
+        return evaluate(policy, inf, start_time)
 
 
 if __name__ == "__main__":

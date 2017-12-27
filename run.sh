@@ -6,7 +6,7 @@
 # make executable chmod +x run.sh
 # ./run.sh
 
-for i in `seq 0.1 1 1`
+for i in `seq 2 0.3 5`
 do
     export ALPHA=$i
     echo "${i}  ${j}"

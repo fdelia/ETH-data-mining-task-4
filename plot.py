@@ -21,6 +21,8 @@ for line in f:
     else:
         y.append(num)
 
+if len(x) > len(y):
+    x = x[:-1]
 plt.plot(x, y)
 
 plt.xlabel('parameter')
